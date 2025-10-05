@@ -1,71 +1,71 @@
-// src/main/java/algorithms/MaxHeap.java
 package algorithms;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class MaxHeap {
-    private int[] heap;
+public class MaxHeap<T extends Comparable<T>> {
+    private T[] heap;
     private int size;
     private int capacity;
+    private final Metrics metrics;
 
-    private long comparisons = 0;
-    private long swaps = 0;
-    private long arrayAccesses = 0;
-    private long memoryAllocations = 0;
-
+    @SuppressWarnings("unchecked")
     public MaxHeap(int capacity) {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be positive");
         }
         this.capacity = capacity;
-        heap = new int[capacity];
-        size = 0;
-        memoryAllocations += (long) capacity * Integer.BYTES; // Approximate memory for int array
+        this.heap = (T[]) new Comparable[capacity];
+        this.size = 0;
+        this.metrics = new Metrics();
+        metrics.incrementMemoryAllocations((long) capacity * Long.BYTES);
     }
 
-    public void buildMaxHeap(int[] arr) {
+    @SuppressWarnings("unchecked")
+    public void buildMaxHeap(T[] arr) {
         if (arr == null || arr.length == 0) {
             throw new IllegalArgumentException("Input array cannot be null or empty");
         }
-        heap = arr;
-        capacity = arr.length;
-        size = arr.length;
-        memoryAllocations += (long) arr.length * Integer.BYTES;
+        this.heap = (T[]) new Comparable[arr.length];
+        this.capacity = arr.length;
+        this.size = arr.length;
+        System.arraycopy(arr, 0, heap, 0, arr.length);
+        metrics.incrementMemoryAllocations((long) arr.length * Long.BYTES);
         for (int i = size / 2 - 1; i >= 0; i--) {
             maxHeapify(i);
         }
     }
 
-    public void insert(int key) {
+    public void insert(T key) {
         if (size == capacity) {
-            throw new IllegalStateException("Heap is full");
+            resize();
         }
         heap[size] = key;
-        arrayAccesses++; // Write to heap[size]
+        metrics.incrementArrayAccesses(1);
         size++;
         siftUp(size - 1);
     }
 
-    public void increaseKey(int i, int newVal) {
+    public void increaseKey(int i, T newVal) {
         if (i < 0 || i >= size) {
             throw new IndexOutOfBoundsException("Invalid index");
         }
-        arrayAccesses++; // Access heap[i]
-        if (newVal < heap[i]) {
+        metrics.incrementArrayAccesses(1);
+        if (newVal.compareTo(heap[i]) < 0) {
             throw new IllegalArgumentException("New value must be greater than or equal to current");
         }
         heap[i] = newVal;
-        arrayAccesses++; // Write to heap[i]
+        metrics.incrementArrayAccesses(1);
         siftUp(i);
     }
 
-    public int extractMax() {
+    public T extractMax() {
         if (size <= 0) {
             throw new IllegalStateException("Heap is empty");
         }
-        arrayAccesses++; // Access heap[0]
-        int max = heap[0];
-        arrayAccesses += 2; // Access heap[size-1] and write to heap[0]
+        metrics.incrementArrayAccesses(1);
+        T max = heap[0];
+        metrics.incrementArrayAccesses(2);
         heap[0] = heap[size - 1];
         size--;
         if (size > 0) {
@@ -74,49 +74,61 @@ public class MaxHeap {
         return max;
     }
 
-    public int getMax() {
+    public T getMax() {
         if (size <= 0) {
             throw new IllegalStateException("Heap is empty");
         }
-        arrayAccesses++;
+        metrics.incrementArrayAccesses(1);
         return heap[0];
     }
 
     private void maxHeapify(int i) {
-        int left = left(i);
-        int right = right(i);
-        int largest = i;
-        if (left < size) {
-            arrayAccesses++; // heap[left]
-            comparisons++;
-            if (heap[left] > heap[largest]) {
-                largest = left;
+        while (true) {
+            int left = left(i);
+            int right = right(i);
+            int largest = i;
+            if (left < size) {
+                metrics.incrementArrayAccesses(1);
+                metrics.incrementComparisons(1);
+                if (heap[left].compareTo(heap[largest]) > 0) {
+                    largest = left;
+                }
             }
-        }
-        if (right < size) {
-            arrayAccesses++; // heap[right]
-            comparisons++;
-            if (heap[right] > heap[largest]) {
-                largest = right;
+            if (right < size) {
+                metrics.incrementArrayAccesses(1);
+                metrics.incrementComparisons(1);
+                if (heap[right].compareTo(heap[largest]) > 0) {
+                    largest = right;
+                }
             }
-        }
-        if (largest != i) {
+            if (largest == i) {
+                break;
+            }
             swap(i, largest);
-            maxHeapify(largest);
+            i = largest;
         }
     }
 
     private void siftUp(int i) {
         while (i > 0) {
             int parent = parent(i);
-            arrayAccesses++; // Access heap[parent]
-            comparisons++;
-            if (heap[parent] >= heap[i]) {
+            metrics.incrementArrayAccesses(1);
+            metrics.incrementComparisons(1);
+            if (heap[parent].compareTo(heap[i]) >= 0) {
                 break;
             }
             swap(i, parent);
             i = parent;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void resize() {
+        capacity *= 2;
+        T[] newHeap = (T[]) new Comparable[capacity];
+        metrics.incrementMemoryAllocations((long) capacity * Long.BYTES);
+        System.arraycopy(heap, 0, newHeap, 0, size);
+        heap = newHeap;
     }
 
     private int parent(int i) {
@@ -132,29 +144,47 @@ public class MaxHeap {
     }
 
     private void swap(int i, int j) {
-        arrayAccesses += 4; // 2 reads, 2 writes (temp not counted)
-        int temp = heap[i];
+        metrics.incrementArrayAccesses(4);
+        T temp = heap[i];
         heap[i] = heap[j];
         heap[j] = temp;
-        swaps++;
+        metrics.incrementSwaps(1);
     }
 
-    public long getComparisons() { return comparisons; }
-    public long getSwaps() { return swaps; }
-    public long getArrayAccesses() { return arrayAccesses; }
-    public long getMemoryAllocations() { return memoryAllocations; }
-
-    public void resetMetrics() {
-        comparisons = 0;
-        swaps = 0;
-        arrayAccesses = 0;
-        memoryAllocations = 0;
+    public int getSize() {
+        return size;
     }
 
-    public int getSize() { return size; }
+    public Metrics getMetrics() {
+        return metrics;
+    }
 
     @Override
     public String toString() {
         return Arrays.toString(Arrays.copyOf(heap, size));
+    }
+
+    public static class Metrics {
+        private final AtomicLong comparisons = new AtomicLong();
+        private final AtomicLong swaps = new AtomicLong();
+        private final AtomicLong arrayAccesses = new AtomicLong();
+        private final AtomicLong memoryAllocations = new AtomicLong();
+
+        public long getComparisons() { return comparisons.get(); }
+        public long getSwaps() { return swaps.get(); }
+        public long getArrayAccesses() { return arrayAccesses.get(); }
+        public long getMemoryAllocations() { return memoryAllocations.get(); }
+
+        public void incrementComparisons(long value) { comparisons.addAndGet(value); }
+        public void incrementSwaps(long value) { swaps.addAndGet(value); }
+        public void incrementArrayAccesses(long value) { arrayAccesses.addAndGet(value); }
+        public void incrementMemoryAllocations(long value) { memoryAllocations.addAndGet(value); }
+
+        public void reset() {
+            comparisons.set(0);
+            swaps.set(0);
+            arrayAccesses.set(0);
+            memoryAllocations.set(0);
+        }
     }
 }
