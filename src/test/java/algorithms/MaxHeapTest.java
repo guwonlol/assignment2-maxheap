@@ -1,4 +1,3 @@
-// src/test/java/algorithms/MaxHeapTest.java
 package algorithms;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -7,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MaxHeapTest {
-    private MaxHeap heap;
+    private MaxHeap<Integer> heap;
 
     @BeforeEach
     void setUp() {
-        heap = new MaxHeap(10);
+        heap = new MaxHeap<>(10);
     }
 
     @Test
@@ -26,7 +25,7 @@ public class MaxHeapTest {
 
     @Test
     void testExtractMax() {
-        int[] arr = {1, 3, 5, 7, 9};
+        Integer[] arr = {1, 3, 5, 7, 9};
         heap.buildMaxHeap(arr);
         assertEquals(9, heap.extractMax());
         assertEquals(7, heap.extractMax());
@@ -46,15 +45,15 @@ public class MaxHeapTest {
 
     @Test
     void testBuildMaxHeap() {
-        int[] arr = {4, 1, 3, 2, 16, 9, 10, 14, 8, 7};
+        Integer[] arr = {4, 1, 3, 2, 16, 9, 10, 14, 8, 7};
         heap.buildMaxHeap(arr);
         assertEquals(16, heap.getMax());
     }
 
     @Test
     void testEmptyHeap() {
-        assertThrows(IllegalStateException.class, heap::extractMax);
-        assertThrows(IllegalStateException.class, heap::getMax);
+        assertThrows(IllegalStateException.class, () -> heap.extractMax());
+        assertThrows(IllegalStateException.class, () -> heap.getMax());
     }
 
     @Test
@@ -80,4 +79,12 @@ public class MaxHeapTest {
         assertThrows(IllegalArgumentException.class, () -> heap.increaseKey(0, 5));
     }
 
+    @Test
+    void testDynamicResizing() {
+        for (int i = 0; i < 15; i++) {
+            heap.insert(i);
+        }
+        assertEquals(14, heap.getMax());
+        assertEquals(15, heap.getSize());
+    }
 }
