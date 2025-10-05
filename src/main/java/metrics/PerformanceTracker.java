@@ -1,11 +1,6 @@
 // src/main/java/metrics/PerformanceTracker.java
-
 package metrics;
 
-/**
- * Utility class for tracking performance metrics.
- * Can be extended or used to export to CSV.
- */
 public class PerformanceTracker {
     private long timeStart;
     private long timeEnd;
