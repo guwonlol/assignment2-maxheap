@@ -1,5 +1,4 @@
 // src/main/java/cli/BenchmarkRunner.java
-
 package cli;
 
 import algorithms.MaxHeap;
@@ -9,10 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-/**
- * CLI for running benchmarks on MaxHeap with different input sizes.
- * Usage: java cli.BenchmarkRunner <input_sizes> (comma-separated, e.g., 100,1000)
- */
 public class BenchmarkRunner {
     private static final int[] DEFAULT_SIZES = {100, 1000, 10000, 100000};
     private static final String CSV_FILE = "performance.csv";
@@ -57,9 +52,7 @@ public class BenchmarkRunner {
         writer.write(tracker.toCsv("buildMaxHeap", n, heap.getComparisons(), heap.getSwaps(),
                 heap.getArrayAccesses(), heap.getMemoryAllocations()));
 
-        // Insert (but since built, simulate inserts if needed)
-
-        // Extract-max all elements (like heap sort)
+        // Extract-max all elements
         tracker.startTracking();
         heap.resetMetrics();
         while (heap.getSize() > 0) {
@@ -69,7 +62,7 @@ public class BenchmarkRunner {
         writer.write(tracker.toCsv("extractMaxAll", n, heap.getComparisons(), heap.getSwaps(),
                 heap.getArrayAccesses(), heap.getMemoryAllocations()));
 
-        // Increase-key example: random increases
+        // Increase-key example
         heap.buildMaxHeap(arr.clone()); // Rebuild
         tracker.startTracking();
         heap.resetMetrics();
