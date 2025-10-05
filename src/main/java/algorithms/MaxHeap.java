@@ -1,29 +1,18 @@
 // src/main/java/algorithms/MaxHeap.java
-
 package algorithms;
 
 import java.util.Arrays;
 
-/**
- * Max-Heap implementation with increase-key and extract-max operations.
- * Includes metrics tracking for comparisons, swaps, array accesses, and memory allocations.
- * All operations are designed to be efficient with O(log n) time for insert, increase-key, and extract-max.
- */
 public class MaxHeap {
     private int[] heap;
     private int size;
     private int capacity;
 
-    // Metrics
     private long comparisons = 0;
     private long swaps = 0;
     private long arrayAccesses = 0;
     private long memoryAllocations = 0;
 
-    /**
-     * Constructor for MaxHeap with given capacity.
-     * @param capacity Maximum size of the heap.
-     */
     public MaxHeap(int capacity) {
         if (capacity <= 0) {
             throw new IllegalArgumentException("Capacity must be positive");
@@ -34,11 +23,6 @@ public class MaxHeap {
         memoryAllocations += (long) capacity * Integer.BYTES; // Approximate memory for int array
     }
 
-    /**
-     * Builds a max-heap from an input array in O(n) time.
-     * This is in-place and modifies the input array.
-     * @param arr Array to build heap from.
-     */
     public void buildMaxHeap(int[] arr) {
         if (arr == null || arr.length == 0) {
             throw new IllegalArgumentException("Input array cannot be null or empty");
@@ -52,11 +36,6 @@ public class MaxHeap {
         }
     }
 
-    /**
-     * Inserts a key into the heap and maintains heap property by bubbling up.
-     * Time: O(log n)
-     * @param key Value to insert.
-     */
     public void insert(int key) {
         if (size == capacity) {
             throw new IllegalStateException("Heap is full");
@@ -67,12 +46,6 @@ public class MaxHeap {
         siftUp(size - 1);
     }
 
-    /**
-     * Increases the key at index i to newVal and maintains heap property.
-     * Time: O(log n)
-     * @param i Index to increase.
-     * @param newVal New value (must be >= current value).
-     */
     public void increaseKey(int i, int newVal) {
         if (i < 0 || i >= size) {
             throw new IndexOutOfBoundsException("Invalid index");
@@ -86,11 +59,6 @@ public class MaxHeap {
         siftUp(i);
     }
 
-    /**
-     * Extracts and returns the maximum element (root).
-     * Time: O(log n)
-     * @return Maximum value.
-     */
     public int extractMax() {
         if (size <= 0) {
             throw new IllegalStateException("Heap is empty");
@@ -106,11 +74,6 @@ public class MaxHeap {
         return max;
     }
 
-    /**
-     * Returns the maximum element without removing it.
-     * Time: O(1)
-     * @return Maximum value.
-     */
     public int getMax() {
         if (size <= 0) {
             throw new IllegalStateException("Heap is empty");
@@ -119,11 +82,6 @@ public class MaxHeap {
         return heap[0];
     }
 
-    /**
-     * Heapify down from index i to maintain max-heap property.
-     * Time: O(log n)
-     * @param i Index to heapify.
-     */
     private void maxHeapify(int i) {
         int left = left(i);
         int right = right(i);
@@ -148,11 +106,6 @@ public class MaxHeap {
         }
     }
 
-    /**
-     * Sift up from index i to maintain max-heap property (bubble up).
-     * Time: O(log n)
-     * @param i Index to sift up.
-     */
     private void siftUp(int i) {
         while (i > 0) {
             int parent = parent(i);
@@ -186,7 +139,6 @@ public class MaxHeap {
         swaps++;
     }
 
-    // Metrics getters
     public long getComparisons() { return comparisons; }
     public long getSwaps() { return swaps; }
     public long getArrayAccesses() { return arrayAccesses; }
