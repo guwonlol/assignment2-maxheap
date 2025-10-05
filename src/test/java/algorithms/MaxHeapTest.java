@@ -1,5 +1,4 @@
 // src/test/java/algorithms/MaxHeapTest.java
-
 package algorithms;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -81,5 +80,4 @@ public class MaxHeapTest {
         assertThrows(IllegalArgumentException.class, () -> heap.increaseKey(0, 5));
     }
 
-    // Additional property-based tests can be added using libraries like JUnit Quickcheck if available
 }
